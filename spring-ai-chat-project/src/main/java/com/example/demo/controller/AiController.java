@@ -17,14 +17,13 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/ai")
 @Slf4j
 public class AiController {
-	
-	@Autowired
-	private AiService aiService;
-	
 	/*
 	@Autowired
-	private AiServiceByChatClient aiService;
+	private AiService aiService;
 	*/
+	
+	@Autowired
+	private AiServiceByChatClient aiService;
 	
 	//클라이언트에서 받아야할 요청 본문타입(consumes), 응답 본문으로 제공할 타입(produces) 명시
 	@PostMapping(
