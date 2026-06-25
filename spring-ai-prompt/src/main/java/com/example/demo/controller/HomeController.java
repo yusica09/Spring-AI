@@ -19,4 +19,26 @@ public class HomeController {
 	public String multiMessages() {
 	    return "multi-messages";
 	}
+	
+	@GetMapping("/default-method")
+	public String defaultMethod() {
+		return "default-method";
+	}
+	
+	@GetMapping("/zero-shot-prompt")
+	public String zeroShotPrompt() {
+		return "zero-shot-prompt";
+	}
+	
+	@GetMapping("/few-shot-prompt")
+	public String fewShotPrompt() {
+		return "few-shot-prompt";
+	}
+	
+	@GetMapping("/role-assignment")
+	public String roleAssignment() {
+		return "role-assignment";
+	}
+	
+	
 }
