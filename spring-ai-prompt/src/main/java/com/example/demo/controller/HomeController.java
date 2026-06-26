@@ -40,5 +40,20 @@ public class HomeController {
 		return "role-assignment";
 	}
 	
+	@GetMapping("/step-back-prompt")
+	public String stepBackPrompt() {
+		return "step-back-prompt";
+	}
+	
+	@GetMapping("/chain-of-thought")
+	public String chainOfThought() {
+		return "chain-of-thought";
+	}
+	
+	@GetMapping("/self-consistency")
+	public String selfConsistency() {
+		return "self-consistency";
+	}
+	
 	
 }
