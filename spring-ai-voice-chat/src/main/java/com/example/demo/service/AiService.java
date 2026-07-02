@@ -55,7 +55,7 @@ public class AiService {
 	public byte[] tts(String text) {
 		//모델 옵션 설정
 		OpenAiAudioSpeechOptions options = OpenAiAudioSpeechOptions.builder()
-				.model("gpt-40-mini-tts")
+				.model("gpt-4o-mini-tts")
 				.voice(SpeechRequest.Voice.ALLOY)
 				.responseFormat(SpeechRequest.AudioResponseFormat.MP3)
 				.speed(1.0)
