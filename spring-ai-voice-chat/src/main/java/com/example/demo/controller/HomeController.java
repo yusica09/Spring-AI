@@ -14,5 +14,10 @@ public class HomeController {
 	public String audioTest() {
 		return "stt-tts";
 	}
+	
+	@GetMapping("/stt-llm-tts")
+	public String sttLlmTts2() {
+		return "stt-llm-tts";
+	}
 
 }

@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.service.AiService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/ai")
@@ -45,5 +49,15 @@ public class AiController {
 		byte[] bytes = aiService.tts(text);
 		return bytes;
 	}
-
+	
+	@PostMapping(
+			value = "/chat-text",
+			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE
+			)
+	public Map<String, String> chatText(@RequestParam("question") String question) {
+		Map<String, String> response = aiService.chatText(question);
+		return response;
+	}
+	
 }
