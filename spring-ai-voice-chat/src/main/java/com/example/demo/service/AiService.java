@@ -12,6 +12,7 @@ import org.springframework.ai.openai.OpenAiAudioSpeechOptions;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest;
+import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioResponseFormat;
 import org.springframework.ai.openai.audio.speech.SpeechPrompt;
 import org.springframework.ai.openai.audio.speech.SpeechResponse;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 
 @Service
 @Slf4j
@@ -83,7 +85,7 @@ public class AiService {
 				.call()
 				.content();
 		
-		//TTS 모델로 요청하고 응답으로 받은 음성 데이터를 base64 문자열로 변환
+		//TTS 모델로 요청하고 응답으로 받은 음성 데이터를 JSON형태로 전송하기 위해 base64 문자열로 변환
 		byte[] audio = tts(textAnswer);
 		String base64Audio = Base64.getEncoder().encodeToString(audio);
 		
@@ -93,6 +95,42 @@ public class AiService {
 		response.put("audio", base64Audio);
 		
 		return response;
+	}
+	
+	public Flux<byte[]> ttsFlux(String text) {
+		// 모델 옵션 설정
+	    OpenAiAudioSpeechOptions options = OpenAiAudioSpeechOptions.builder()
+	    		.model("gpt-4o-mini-tts")
+	    		.voice(SpeechRequest.Voice.ALLOY)
+	    		.responseFormat(AudioResponseFormat.MP3)
+	    		.speed(1.0f)
+	    		.build();
+
+	    // 프롬프트 생성
+	    SpeechPrompt prompt = new SpeechPrompt(text, options);
+
+	    // 모델로 요청하고 응답받기
+	    Flux<SpeechResponse> response = openAiAudioSpeechModel.stream(prompt);
+	    Flux<byte[]> flux = response.map(speechResponse -> speechResponse.getResult().getOutput());
+	    
+	    return flux;
+	}
+	
+	public Flux<byte[]> chatVoiceSttLlmTts(byte[] audioBytes) {
+		// STT를 이용해서 음성 질문을 텍스트 질문으로 변환
+	    String textQuestion = stt(audioBytes);
+
+	    // 텍스트 질문으로 LLM에 요청하고, 텍스트 응답 얻기
+	    String textAnswer = chatClient.prompt()
+	    		.system("50자 이내로 답변해주세요.")
+	    		.user(textQuestion)
+	        	.call()
+	        	.content();
+
+	    // TTS를 이용해서 비동기 음성 데이터 얻기
+	    Flux<byte[]> flux = ttsFlux(textAnswer);
+	    
+	    return flux;
 	}
 	
 

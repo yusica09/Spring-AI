@@ -60,4 +60,23 @@ public class AiController {
 		return response;
 	}
 	
+	@PostMapping(
+		    value = "/chat-voice-stt-llm-tts", 
+		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE, 
+		    produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+		    )
+	public void chatVoiceSttLlmTts(@RequestParam("question") MultipartFile question, 
+		HttpServletResponse response) throws Exception {
+		
+		// 비동기 음성 데이터를 Flux<byte[]>을 얻기
+		Flux<byte[]> flux = aiService.chatVoiceSttLlmTts(question.getBytes());
+
+		// 음성 데이터를 응답 본문으로 스트림 출력
+		OutputStream outputStream = response.getOutputStream();
+		for (byte[] chunk : flux.toIterable()) {
+			outputStream.write(chunk);
+		    outputStream.flush();
+		}
+	}
+	
 }
