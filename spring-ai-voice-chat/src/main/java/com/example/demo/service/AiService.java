@@ -109,7 +109,7 @@ public class AiService {
 	    // 프롬프트 생성
 	    SpeechPrompt prompt = new SpeechPrompt(text, options);
 
-	    // 모델로 요청하고 응답받기
+	    // 모델로 요청하고 응답받기 -> call()대신 stream()사용
 	    Flux<SpeechResponse> response = openAiAudioSpeechModel.stream(prompt);
 	    Flux<byte[]> flux = response.map(speechResponse -> speechResponse.getResult().getOutput());
 	    

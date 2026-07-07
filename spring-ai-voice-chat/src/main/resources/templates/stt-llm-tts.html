@@ -33,6 +33,10 @@
 
         // 멀티파트 폼 구성
         const formData = new FormData();
+        /*
+         사용자의 음성 질문은 파일명이 없는 MP3 Blob 형태이므로, REST API에서 MIME 타입을 인식할 수 있도록
+         확장명이 mp3인 임의의 파일 이름 지정 -> speech.mp3
+        */
         formData.append("speech", mp3Blob, 'speech.mp3');
 
         // 녹화된 음성을 텍스트로 변환 요청
@@ -70,7 +74,7 @@
         method: "post",
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
+          'Accept': 'application/json' //응답 내용은 json -> 텍스트 답변 + Base64 문자열로 인코딩된 음성답변
         },
         body: new URLSearchParams({ question: questionText })
       });

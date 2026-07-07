@@ -55,6 +55,7 @@ public class AiController {
 			consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE
 			)
+	//클라이언트로부터 텍스트 질문을 받고, AiService의 chatText() 호출 후 텍스트 답변과 음성 답변이 저장된 Map 얻고 반환
 	public Map<String, String> chatText(@RequestParam("question") String question) {
 		Map<String, String> response = aiService.chatText(question);
 		return response;
