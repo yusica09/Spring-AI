@@ -64,7 +64,7 @@ public class AiController {
 	@PostMapping(
 		    value = "/chat-voice-stt-llm-tts", 
 		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE, 
-		    produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+		    produces = MediaType.APPLICATION_OCTET_STREAM_VALUE //스트림 음성답변이 출력되므로
 		    )
 	public void chatVoiceSttLlmTts(@RequestParam("question") MultipartFile question, 
 		HttpServletResponse response) throws Exception {
@@ -73,11 +73,37 @@ public class AiController {
 		Flux<byte[]> flux = aiService.chatVoiceSttLlmTts(question.getBytes());
 
 		// 음성 데이터를 응답 본문으로 스트림 출력
+		// HttpServletResponse를 이용해서 HTTP 응답 본문에 스트림 음성 답변 출력
+		// StringHttpMessageConverter로 인해 Flux<String> 반환타입 가능 / 그러나 Flux<byte[]>는 반환타입 불가
 		OutputStream outputStream = response.getOutputStream();
 		for (byte[] chunk : flux.toIterable()) {
 			outputStream.write(chunk);
 		    outputStream.flush();
 		}
 	}
+	
+	// HttpServletResponse 대신 StreamingResponseBody를 이용한 버전
+	// @PostMapping(
+	//   		value = "/chat-voice-stt-llm-tts", 
+	//   		consumes = MediaType.MULTIPART_FORM_DATA_VALUE, 
+	//   		produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+	// 			)
+	// public StreamingResponseBody chatVoiceSttLlmTts(@RequestParam("question") MultipartFile question,
+	//     HttpServletResponse response) throws Exception {
+	//   	// 비동기 음성 데이터를 Flux<byte[]>을 얻기
+	//   Flux<byte[]> flux = aiService.chatVoiceSttLlmTts(question.getBytes());
+
+	//   // 음성 데이터를 응답 본문으로 스트림 출력
+	//   StreamingResponseBody srd = new StreamingResponseBody() {
+	//     @Override
+	//     public void writeTo(OutputStream outputStream) throws IOException {
+	//       for (byte[] chunk : flux.toIterable()) {
+	//         outputStream.write(chunk);
+	//         outputStream.flush();
+	//       }
+	//     }
+	//   };    
+	//   return srd;
+	// }
 	
 }

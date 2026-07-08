@@ -111,6 +111,7 @@ public class AiService {
 
 	    // 모델로 요청하고 응답받기 -> call()대신 stream()사용
 	    Flux<SpeechResponse> response = openAiAudioSpeechModel.stream(prompt);
+	    //Flux<SpeechResponse>는 브라우저로 보내는 응답으로 사용할 수 없기때문에 Flux<byte[]>로 변환
 	    Flux<byte[]> flux = response.map(speechResponse -> speechResponse.getResult().getOutput());
 	    
 	    return flux;
