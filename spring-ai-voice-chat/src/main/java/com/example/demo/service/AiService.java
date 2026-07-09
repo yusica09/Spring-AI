@@ -2,15 +2,25 @@ package com.example.demo.service;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
 import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.content.Media;
 import org.springframework.ai.openai.OpenAiAudioSpeechModel;
 import org.springframework.ai.openai.OpenAiAudioSpeechOptions;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.AudioParameters;
+import org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.AudioParameters.Voice;
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest;
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioResponseFormat;
 import org.springframework.ai.openai.audio.speech.SpeechPrompt;
@@ -18,6 +28,7 @@ import org.springframework.ai.openai.audio.speech.SpeechResponse;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeType;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -134,6 +145,47 @@ public class AiService {
 	    return flux;
 	}
 	
+	public byte[] chatVoiceOneModel(byte[] audioBytes, String mimeType) throws Exception {
+		//음성 데이터를 Resource로 생성
+	    Resource resource = new ByteArrayResource(audioBytes);
+
+	    // 사용자 메시지 생성
+	    UserMessage userMessage = UserMessage.builder()
+	        // 빈문자열이라도 제공해야함
+	        .text("제공되는 음성에 맞는 자연스러운 대화로 이어주세요.")
+	        .media(new Media(MimeType.valueOf(mimeType), resource))
+	        .build();
+
+	    //모델 옵션 설정
+	    ChatOptions chatOptions = OpenAiChatOptions.builder()
+	        .model("gpt-audio-1.5")
+	        .outputModalities(List.of("text", "audio"))
+	        .outputAudio(new AudioParameters(
+	            Voice.ALLOY,
+	            org.springframework.ai.openai.api.OpenAiApi.ChatCompletionRequest.AudioParameters.AudioResponseFormat.MP3))
+	        .build();
+
+	    // gpt-4o-mini-audio 모델은 스트림을 지원하지 않기 때문에 동기 방식 사용
+	    // 모델로 요청하고 응답 받기
+	    ChatResponse response = chatClient.prompt()
+	        .system("50자 이내로 답변해주세요.")
+	        .messages(userMessage)
+	        .options(chatOptions)
+	        .call()
+	        .chatResponse();
+	    
+	    //AI 메시지 얻기
+	    AssistantMessage assistantMessage = response.getResult().getOutput();
+	    
+	    //텍스트 답변 얻기
+	    String textAnswer = assistantMessage.getText();
+	    log.info("텍스트 응답: {}", textAnswer);
+
+	    //오디오 답변 얻기
+	    byte[] audioAnswer = assistantMessage.getMedia().get(0).getDataAsByteArray();
+
+	    return audioAnswer;
+	  }
 
 	
 	

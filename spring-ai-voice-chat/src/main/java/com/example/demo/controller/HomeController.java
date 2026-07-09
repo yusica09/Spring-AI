@@ -24,5 +24,10 @@ public class HomeController {
 	public String chatVoiceSttLlmTts() {
 		return "chat-voice-stt-llm-tts";
 	}
+	
+	@GetMapping("/chat-voice-one-model")
+	public String chatVoiceOneModel() {
+		return "chat-voice-one-model";
+	}
 
 }

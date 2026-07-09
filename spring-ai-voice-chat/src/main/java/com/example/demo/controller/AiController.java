@@ -106,4 +106,15 @@ public class AiController {
 	//   return srd;
 	// }
 	
+	@PostMapping(
+			value = "/chat-voice-one-model", 
+		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE, 
+		    produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+		    )
+	public byte[] chatVoiceOneModel(@RequestParam("question") MultipartFile question,
+		    								HttpServletResponse response) throws Exception {
+		byte[] bytes = aiService.chatVoiceOneModel(question.getBytes(), question.getContentType());
+		return bytes;
+	}
+	
 }
