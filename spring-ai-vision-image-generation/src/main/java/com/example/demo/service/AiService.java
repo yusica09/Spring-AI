@@ -1,11 +1,17 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
+import org.springframework.ai.image.ImageMessage;
 import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.image.ImagePrompt;
+import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -22,7 +28,7 @@ public class AiService {
 	
 	@Autowired
 	//이미지 생성형 모델을 사용하기 위한 인터페이스
-	private ImageModel imagemodel;
+	private ImageModel imageModel;
 
 	// ## 생성자 ##
 	public AiService(ChatClient.Builder chatClientBuilder) {
@@ -60,6 +66,69 @@ public class AiService {
 		
 		return flux;
 	}
+	
+	// ##### 한글 문장을 영어 문장으로 번역하는 메소드 #####
+	private String koToEn(String text) {
+		String question = """
+				  		당신은 번역사입니다. 아래 한글 문장을 영어 문장으로 번역해주세요.
+				   		%s
+				 		""".formatted(text);
+
+	    // UserMessage 생성
+	    UserMessage userMessage = UserMessage.builder()
+	    		.text(question)
+	    		.build();
+
+	    // Prompt 생성
+	    Prompt prompt = Prompt.builder()
+	    		.messages(userMessage)
+	    		.build();
+
+	    // LLM을 호출하고 텍스트 답변 얻기
+	    String englishDescription = chatClient.prompt(prompt).call().content();
+	    
+	    return englishDescription;
+	 }
+	
+	// ##### 이미지를 새로 생성하는 메소드 #####
+	public String generateImage(String description) {
+		// 한글 질문을 영어 질문으로 번역
+	    String englishDescription = koToEn(description);
+
+	    // 이미지 설명을 포함하는 ImageMessage 생성
+	    ImageMessage imageMessage = new ImageMessage(englishDescription);
+
+	    // gpt-image-1 옵션 설정
+	    OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
+	    		.model("gpt-image-1")
+	    		.quality("low")
+	    		.width(1536)
+	    		.height(1024)
+	    		.N(1)
+	    		.build();
+	  
+	    // dall-e 시리즈 옵션 설정
+	    // OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
+	    //     	// dall-e 시리즈 옵션
+	    //     	.model("dall-e-3")
+	    //     	.responseFormat("b64_json")
+	    //     	.width(1024)
+	    //     	.height(1024)
+	    //     	.N(1)
+	    //     	.build();        
+
+	    // 프롬프트 생성
+	    List<ImageMessage> imageMessageList = List.of(imageMessage);
+	    ImagePrompt imagePrompt = new ImagePrompt(imageMessageList, imageOptions);
+
+	    // 모델 호출 및 응답 받기
+	    ImageResponse imageResponse = imageModel.call(imagePrompt);
+
+	    // base64로 인코딩된 이미지 문자열 얻기
+	    String b64Json = imageResponse.getResult().getOutput().getB64Json();
+	    
+	    return b64Json;
+	  }
 	
 	
 	
