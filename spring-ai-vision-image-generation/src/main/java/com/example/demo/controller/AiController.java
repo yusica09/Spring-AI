@@ -41,5 +41,22 @@ public class AiController {
 		
 		return flux;
 	}
+	
+	@PostMapping(
+		    value = "/image-generate",
+		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+		    produces = MediaType.TEXT_PLAIN_VALUE
+		    )
+	public String imageGenerate(@RequestParam("description") String description) {
+		try {
+		      String b64Json = aiService.generateImage(description);
+		      
+		      return b64Json;
+		} catch(Exception e) {
+		      e.printStackTrace();
+		      
+		      return "Error: " + e.getMessage();
+		}
+	}
 
 }
