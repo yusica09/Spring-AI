@@ -27,7 +27,7 @@ public class AiController {
 	@PostMapping(
 			value = "/image-analysis",
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-			produces = MediaType.APPLICATION_NDJSON_VALUE
+			produces = MediaType.APPLICATION_NDJSON_VALUE //비동기 스트림 응답
 			)
 	public Flux<String> imageAnalysis(@RequestParam("question") String question,
 									@RequestParam("attach") MultipartFile attach) throws IOException{

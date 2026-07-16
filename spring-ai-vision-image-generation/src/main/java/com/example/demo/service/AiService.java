@@ -35,7 +35,7 @@ public class AiService {
 		chatClient = chatClientBuilder.build();
 	}
 	
-	// ## 메소드 ##
+	// ## 메소드 ##									//contentType = 이미지의 MIME 타입
 	public Flux<String> imageAnalysis(String question, String contentType, byte[] bytes){
 		//시스템 메시지 생성
 		SystemMessage systemMessage = SystemMessage.builder()
