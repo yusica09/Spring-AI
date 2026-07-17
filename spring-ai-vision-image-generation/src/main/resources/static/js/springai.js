@@ -423,7 +423,7 @@ springai.vision.previewCamera = function(videoId) {
   //<video> 엘리먼트 얻기
   const video = document.getElementById(videoId);
   //카메라를 활성화하고 <video>에서 보여주기
-  navigator.mediaDevices.getUserMedia({ video: true })
+  navigator.mediaDevices.getUserMedia({ video: true }) //브라우저에서 카메라 활성화
     .then((stream) => {
       video.srcObject = stream;
       video.play();

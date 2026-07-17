@@ -18,8 +18,8 @@
 
     // ##### 제출 버튼을 클릭했을 때 실행하는 함수 #####
     function handleSubmit() {   
-      // 카메라 영상에서 프레임을 추출하기
-      springai.vision.captureFrame("video", (pngBlob) => {
+      // 카메라 영상에서 프레임을 추출하기 -> 추출된 프레임은 PNG 포맷의 이미지 데이터
+      springai.vision.captureFrame("video", (pngBlob) => { //두번째 매개값 함수 콜백
         //대화 하기
         chat(pngBlob);
       });
@@ -44,7 +44,7 @@
         const response = await fetch('/ai/image-analysis', {
           method: "post",
           headers: {
-            'Accept': 'application/x-ndjson'
+            'Accept': 'application/x-ndjson' //스트림 텍스트
           },
           body: formData
         });
