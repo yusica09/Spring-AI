@@ -14,11 +14,20 @@ import org.springframework.ai.image.ImageResponse;
 import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -129,6 +138,102 @@ public class AiService {
 	    
 	    return b64Json;
 	  }
+	
+	// ##### 원본 이미지를 편집하는 메소드 #####
+	public String editImage(String description, byte[] originalImage, byte[] maskImage) {
+		// 한글 질문을 영어 질문으로 번역
+	    String englishDescription = koToEn(description);
+
+	    // 원본 이미지를 ByteArrayResource로 생성
+	    ByteArrayResource originalRes = new ByteArrayResource(originalImage) {
+	    	@Override
+	    	public String getFilename() {
+	    		return "image.png"; // 가상 파일 이름 반환(확장명으로 타입 정보 획득)
+	    	}
+	    };
+
+	    // 마스크 이미지를 ByteArrayResource로 생성
+	    ByteArrayResource maskRes = new ByteArrayResource(maskImage) {
+	    	@Override
+	    	public String getFilename() {
+	    		return "mask.png"; // 가상 파일 이름 반환
+	    	}
+	    };
+
+	    // 이미지 모델 옵션 설정
+	    MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+	    form.add("model", "gpt-image-1");
+	    form.add("image", originalRes);
+	    form.add("mask", maskRes);
+	    form.add("prompt", englishDescription);
+	    form.add("n", "1");
+	    form.add("size", "1536x1024");
+	    form.add("quality", "high");
+
+	    // WebClient 생성
+	    WebClient webClient = WebClient.builder()
+	    		// 이미지 편집을 위한 요청 URL
+	    		.baseUrl("https://api.openai.com/v1/images/edits")
+	    		// 인증 헤더 설정
+	    		.defaultHeader("Authorization", "Bearer " + System.getenv("OPENAI_API_KEY"))
+	    		// 전략을 적용해서 메모리를 늘림
+	    		.exchangeStrategies(ExchangeStrategies.builder()
+	    				.codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(10 * 1536 * 1024))
+	    				.build())
+	    		.build();
+
+	    // 비동기 단일값(OpenAIImageEditResponse) 스트림인 Mono 얻기
+	    Mono<OpenAIImageEditResponse> mono = webClient.post()
+	    		// multipart/form-data 형식으로 전송
+	    		.contentType(MediaType.MULTIPART_FORM_DATA)
+	    		// 요청 본문에 form 데이터를 넣음
+	    		.body(BodyInserters.fromMultipartData(form))
+	    		// 응답 받기
+	    		.retrieve()
+	    		// 응답 본문의 JSON을 OpenAIImageEditResponse 타입으로 역직렬화해서
+	    		// 비동기 단일값(OpenAIImageEditResponse) 스트림인 Mono로 반환
+	    		.bodyToMono(OpenAIImageEditResponse.class);
+
+	    // Mono가 완료될 때까지 현재 스레드를 블로킹하고,
+	    // 동기 방식으로 단일값 OpenAIImageEditResponse를 얻음
+	    OpenAIImageEditResponse response = mono.block();
+
+	    // 레코드로부터 base64로 인코딩된 이미지 문자열 얻기
+	    String b64Json = response.data().get(0).b64_json();
+	    
+	    return b64Json;
+
+	    // 클래스로부터 base64로 인코딩된 이미지 문자열 얻기
+	    // String b64Json = response.getData().get(0).getB64_json();
+	    // return b64Json;
+	  }
+	
+	
+	  // 레코드로 역직렬화할 경우
+	  // {"data": [{"url": "xxxxx", "b64_json": "xxxxx"}, ... ]}
+	  // 선언된 필드 외에 JSON에 포함된 속성들을 무시
+	  @JsonIgnoreProperties(ignoreUnknown = true)
+	  public record OpenAIImageEditResponse(List<Image> data) {
+		  @JsonIgnoreProperties(ignoreUnknown = true)
+	      public record Image(
+	    		  String url,
+	    		  String b64_json) {
+	      }
+	  }
+
+	  // 클래스로 역직렬화할 경우
+	  // {"data": [{"url": "xxxxx", "b64_json": "xxxxx"}, ... ]}  
+	  // @Data
+	  // @JsonIgnoreProperties(ignoreUnknown = true)
+	  // public static class OpenAIImageEditResponse {
+	  //   private List<Image> data;
+	  //   @Data
+	  //   @JsonIgnoreProperties(ignoreUnknown = true)
+	  //   public static class Image {
+	  //     private String url;
+	  //     private String b64_json;
+	  //   }
+	  // }
 	
 	
 	
