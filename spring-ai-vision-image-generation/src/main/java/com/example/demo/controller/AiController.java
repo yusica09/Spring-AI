@@ -58,5 +58,22 @@ public class AiController {
 		      return "Error: " + e.getMessage();
 		}
 	}
+	
+	@PostMapping(
+		    value = "/image-edit",
+		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+		    produces = MediaType.TEXT_PLAIN_VALUE
+		    )
+	public String imageEdit(@RequestParam("description") String description, 
+		    			@RequestParam("originalImage") MultipartFile originalImage, 
+		    			@RequestParam("maskImage") MultipartFile maskImage) {
+		    try {
+		    	String b64Json = aiService.editImage(description, originalImage.getBytes(), maskImage.getBytes());
+		    	return b64Json;
+		    } catch(Exception e) {
+		    	e.printStackTrace();
+		        return "Error: " + e.getMessage();
+		    }
+		  }
 
 }
