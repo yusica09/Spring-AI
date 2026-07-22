@@ -77,6 +77,7 @@ public class AiService {
 	}
 	
 	// ##### 한글 문장을 영어 문장으로 번역하는 메소드 #####
+	// 이미지 생성형 모델은 영어문장으로 학습되었기때문에 더 좋은 결과를 위해 번역함
 	private String koToEn(String text) {
 		String question = """
 				  		당신은 번역사입니다. 아래 한글 문장을 영어 문장으로 번역해주세요.
@@ -108,6 +109,7 @@ public class AiService {
 	    ImageMessage imageMessage = new ImageMessage(englishDescription);
 
 	    // gpt-image-1 옵션 설정
+	    // 응답 형식이 b64_json으로 고정되어있어 responseFormat 옵션 존재 x
 	    OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
 	    		.model("gpt-image-1")
 	    		.quality("low")
@@ -117,6 +119,7 @@ public class AiService {
 	    		.build();
 	  
 	    // dall-e 시리즈 옵션 설정
+	    // 응답 형식 b64_json 설정필요. responseFormat 옵션 이용
 	    // OpenAiImageOptions imageOptions = OpenAiImageOptions.builder()
 	    //     	// dall-e 시리즈 옵션
 	    //     	.model("dall-e-3")

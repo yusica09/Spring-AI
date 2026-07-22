@@ -45,6 +45,7 @@ public class AiController {
 	@PostMapping(
 		    value = "/image-generate",
 		    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+		    // 응답은 Base64로 인코딩된 이미지 문자열이므로 다음과 같이 설정
 		    produces = MediaType.TEXT_PLAIN_VALUE
 		    )
 	public String imageGenerate(@RequestParam("description") String description) {

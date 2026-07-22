@@ -93,7 +93,7 @@
           method: "POST", 
           headers: {
             //Content-Type은 자동 생성되는 것을 사용해야 함(구분선 포함)
-            'Accept': 'text/plain'
+            'Accept': 'text/plain' //Base64로 인코딩된 이미지 문자열
           },
           body: formData 
         });
