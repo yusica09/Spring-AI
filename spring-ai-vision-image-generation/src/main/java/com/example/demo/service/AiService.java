@@ -143,6 +143,7 @@ public class AiService {
 	  }
 	
 	// ##### 원본 이미지를 편집하는 메소드 #####
+	//원본 이미지와 마스크 이미지를 보낼때에는 멀티파트 폼으로 보내야하므로 파일명 필요
 	public String editImage(String description, byte[] originalImage, byte[] maskImage) {
 		// 한글 질문을 영어 질문으로 번역
 	    String englishDescription = koToEn(description);
@@ -179,12 +180,16 @@ public class AiService {
 	    		.baseUrl("https://api.openai.com/v1/images/edits")
 	    		// 인증 헤더 설정
 	    		.defaultHeader("Authorization", "Bearer " + System.getenv("OPENAI_API_KEY"))
-	    		// 전략을 적용해서 메모리를 늘림
+	    		// WebClient가 Base64로 인코딩된 이미지 문자열을 처리할수 있도록 메모리를 늘림
 	    		.exchangeStrategies(ExchangeStrategies.builder()
 	    				.codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(10 * 1536 * 1024))
 	    				.build())
 	    		.build();
-
+	    /*
+	     * 비동기 응답 본문을 Mono<T>로 얻기 위해 bodyToMono(T.class)호출함.
+	     * T타입은 응답 본문을 역직렬화할 때 사용하는 타입.
+	     * 아래에선 OpenAIImageEditResponse 사용
+	     */
 	    // 비동기 단일값(OpenAIImageEditResponse) 스트림인 Mono 얻기
 	    Mono<OpenAIImageEditResponse> mono = webClient.post()
 	    		// multipart/form-data 형식으로 전송
