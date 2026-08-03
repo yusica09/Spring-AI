@@ -9,4 +9,9 @@ public class HomeController {
 	public String home() {
 		return "home";
 	}
+	
+	@GetMapping("/advisor-chain")
+	public String advisorChain() {
+	    return "advisor-chain";
+	}
 }
