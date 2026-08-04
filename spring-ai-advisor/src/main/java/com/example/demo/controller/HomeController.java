@@ -14,4 +14,9 @@ public class HomeController {
 	public String advisorChain() {
 	    return "advisor-chain";
 	}
+	
+	@GetMapping("/advisor-context")
+	public String advisorContext() {
+		return "advisor-context";
+	}
 }

@@ -10,11 +10,12 @@ import org.springframework.ai.chat.prompt.Prompt;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+								// 동기방식에서만 사용되도록 CallAdvisor 인터페이스만 구현
 public class MaxCharLengthAdvisor implements CallAdvisor {
 	// ##### 필드 #####
     public static final String MAX_CHAR_LENGH = "maxCharLength";
     private int maxCharLength = 300; //공통 최대 문자 수
-    private int order;
+    private int order; //우선순위
 
     // #### 생성자 #####
     public MaxCharLengthAdvisor(int order) {
