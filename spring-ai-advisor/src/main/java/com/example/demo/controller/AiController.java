@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.service.AiService1;
 import com.example.demo.service.AiService2;
+import com.example.demo.service.AiService3;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,8 @@ public class AiController {
 	private AiService1 aiService1;
 	@Autowired
 	private AiService2 aiService2;
+	@Autowired
+	private AiService3 aiService3;
 	
 	// ##### 요청 매핑 메소드 ####
 	@PostMapping(
@@ -40,6 +43,16 @@ public class AiController {
 			)
 	public String advisorContext(@RequestParam("question") String question) {
 		String response = aiService2.advisorContext(question);
+		return response;
+	}
+	
+	@PostMapping(
+		      value = "/advisor-logging", 
+		      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, 
+		      produces = MediaType.TEXT_PLAIN_VALUE
+			  )
+	public String advisorLogging(@RequestParam("question") String question) {
+		String response = aiService3.advisorLogging(question);
 		return response;
 	}
 
